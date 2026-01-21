@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>競馬ゲーム</title>
+
+<style>
+  body {
+    font-family: sans-serif;
+    margin: 40px;
+
+    /* ▼ 追加：背景画像 */
+    background-image: url("images/turf.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
+
+  h1 { 
+    text-align: center; 
+  }
+
+  .box, .result, .notice {
+    border: 2px solid #333;
+    padding: 16px;
+    width: 500px;
+    margin: 0 auto 20px auto;
+
+    /* ▼ 追加：背景を白＋少し透過 */
+    background: rgba(255, 255, 255, 0.88);
+    border-radius: 10px;
+  }
+
+  .horse { 
+    margin: 6px 0; 
+  }
+
+  .buttons, .predict {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  button { 
+    font-size: 16px; 
+    padding: 6px 14px; 
+    margin: 6px; 
+  }
+
+  input { 
+    font-size: 16px; 
+    width: 60px; 
+    text-align: center; 
+  }
+
+  .notice {
+    font-size: 13px;
+    color: #555;
+    border-style: dashed;
+  }
+
+table.horse-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+table.horse-table th,
+table.horse-table td {
+  border: 1px solid #333;
+  padding: 6px 8px;
+  text-align: left;
+}
+
+table.horse-table th {
+  background: #f0f0f0;
+  text-align: center;
+}
+
+table.horse-table td:nth-child(1),
+table.horse-table td:nth-child(4) {
+  text-align: center;
+  width: 70px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #333;
+  padding: 8px;
+}
+
+th:nth-child(4),
+td:nth-child(4) {
+  width: 160px;   /* ← 単勝オッズ列 */
+  text-align: center;
+}
+
+.hit {
+  font-size: 26px;
+  color: gold;
+  text-align: center;
+  animation: pop 0.6s ease-out;
+}
+
+.miss {
+  font-size: 22px;
+  color: #666;
+  text-align: center;
+  animation: shake 0.4s;
+}
+
+@keyframes pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes shake {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  50% { transform: translateX(6px); }
+  75% { transform: translateX(-6px); }
+  100% { transform: translateX(0); }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+<h1>🐎 競馬ゲーム</h1>
+
+<div class="box">
+  <h3>出走馬（単勝オッズ）</h3>
+  <div id="horseList"></div>
+</div>
+
+<div class="buttons">
+  <button onclick="generateHorses()">① 出走馬生成</button>
+  <button onclick="confirmHorses()" id="confirmBtn" disabled>② このメンバーで開始</button>
+  <button onclick="startRace()" id="startBtn" disabled>🏁 レーススタート</button>
+</div>
+
+<div id="hitMessage" class="hit-area"></div>
+
+<div class="box" id="moneyArea">
+  <strong>資金状況</strong><br>
+  手持ち資金：<span id="money">1000</span> 円<br>
+  配当金累計：<span id="payout">0</span> 円
+</div>
+
+<div class="predict" id="predictArea"></div>
+<div id="result" class="result"></div>
+
+<div class="notice">
+  <strong>【免責事項】</strong><br>
+  本コンテンツはゲーム・シミュレーション目的で作成されたものであり、<br>
+  実際の競馬・公営競技とは一切関係ありません。<br>
+  金銭の賭け・配当の発生はありません。
+</div>
+
+<script>
+let money = 1000;
+let totalPayout = 0;
+let raceFinished = false;
+
+const headWords = ["ソウルフル","スロー","トウカイ","キタサン","シブヤ","イノカシラ","トワイライト","クレイジー","スポーティー","ダンディ","ムーディー","ムラサメ","レッド","ブルー","トト","リズミカル","リアン","ゴンザレス","バット","リメンバー","マイケル","ミス","ドクター","ポルカ","ガーリック","オードリー"];
+const tailWords = ["ドリーム","ダンサー","ロード","エクスプレス","フラッシュ","ストーム","マイキー","カード","シュート","サイクロン","オープン","フォルテ","アリア","ラポール","アサイン","クリティカル","パラドックス","フィードバック","グラビティ","ミラージュ","カンタービレ","マエストロ","ヘブンリー","バスター","カルメン","レクイエム","フィールド","エエヤン","チャリオッツ","レイン","プリンス"];
+const jockeyFamily = ["武田","横山","川田","戸崎","福永","ケンタッキー","坂井","今村","鮫島","椎名","高杉","綾小路","空条","陸王","龍宮寺","荻野","小林","団野","田口","小崎","松本","秋山","角田","岩田","丹内","西村","吉村","池添","斎藤","菱田","原","木幡","佐々木","武田","上杉","真田","虎丸","伊達","花輪","亀田","浮雲","刃田","伊澤","川瀬"];
+const jockeyGiven = ["はじめ","翔太","誠","大也","輝","真","聖","元","正次","勝男","秀正","銀次","辰","太","林檎","渚","まなみ","直太","正章","聡","卓","セナ","竜馬","信長","真之","阿吽","真理雄","累次","圭介","芳樹","次郎","太郎","武蔵","ゆか","智子","利伸"];
+
+let horses = [];
+let userPick = null;
+
+function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function generateHorseName(){ return rand(headWords)+rand(tailWords); }
+function generateJockeyName(){ return rand(jockeyFamily)+rand(jockeyGiven); }
+
+// ★ 単勝オッズ生成（1倍台〜50倍台）
+function generateOdds(power){
+  // power 40〜100 → odds 1.2〜50.0
+  const base = (110 - power);
+  let odds = 1.2 + Math.pow(base / 70, 2.2) * 48;
+  odds += (Math.random() - 0.5) * 4; // ばらつき
+  odds = Math.max(1.2, Math.min(50.0, odds));
+  return Number(odds.toFixed(1));
+}
+
+// ① 馬名生成
+function generateHorses(){
+  horses = [];
+  raceFinished = false;
+
+  const used = new Set();
+  while(used.size < 8) used.add(generateHorseName());
+
+  let num = 1;
+  used.forEach(name => {
+    const power = Math.floor(Math.random()*61)+40;
+    horses.push({
+      number: num,
+      name: name,
+      jockey: generateJockeyName(),
+      power: power,
+      odds: generateOdds(power),
+      score: 0,
+      popularity: 0
+    });
+    num++;
+  });
+
+  setPopularity();
+  displayHorses();
+
+  // ★ ここが抜けていた
+  document.getElementById("confirmBtn").disabled = false;
+
+  // レーススタートはまだ押せない
+  document.getElementById("startBtn").disabled = true;
+
+  document.getElementById("predictArea").innerHTML = "";
+  document.getElementById("result").innerHTML = "";
+  document.getElementById("hitMessage").innerHTML = "";
+}
+
+// 出馬表生成処理
+function generateRace() {
+
+  raceFinished = false;
+
+  document.getElementById("startBtn").disabled = false;
+  document.getElementById("hitMessage").innerHTML = "";
+}
+
+// 人気順を付与
+function setPopularity(){
+  const sorted = [...horses].sort((a,b)=> a.odds - b.odds);
+  sorted.forEach((h,i)=>{
+    horses.find(x=>x.number===h.number).popularity = i+1;
+  });
+}
+
+function displayHorses(){
+  const list = document.getElementById("horseList");
+
+  let html = `
+    <table class="horse-table">
+      <tr>
+        <th style="width: 10%;">番号</th>
+        <th>馬名</th>
+        <th>ジョッキー</th>
+        <th style="width: 30%;">単勝オッズ</th>
+      </tr>
+  `;
+
+  horses.forEach(h => {
+    html += `
+      <tr>
+        <td>${h.number}</td>
+        <td>${h.name}</td>
+        <td>${h.jockey}</td>
+        <td>${h.odds}倍（人気${h.popularity}位）</td>
+      </tr>
+    `;
+  });
+
+  html += `</table>`;
+  list.innerHTML = html;
+}
+
+// ② 決定 → 予想入力表示
+function confirmHorses(){
+  document.getElementById("confirmBtn").disabled = true;
+
+  document.getElementById("predictArea").innerHTML = `
+    <strong>予想</strong><br><br>
+    1位は何番？　
+    <input type="number" id="pick" min="1" max="8"><br><br>
+
+    ベット額（円）　
+    <input type="number" id="bet" min="100" step="100"><br><br>
+  `;
+
+  // ★ ここ！！ レーススタートボタンを有効化
+  document.getElementById("startBtn").disabled = false;
+}
+
+// 🏁 レーススタート
+function startRace() {
+
+  if (raceFinished) return;
+  raceFinished = true;
+
+  // 入力取得
+  const pick = Number(document.getElementById("pick").value);
+  const bet  = Number(document.getElementById("bet").value);
+
+  if (!pick || !bet || bet > money) {
+    alert("入力が正しくありません");
+    raceFinished = false;
+    return;
+  }
+
+  money -= bet;
+
+  // スコア計算
+  horses.forEach(h => {
+  h.score =
+    h.power * (0.6 + Math.random() * 0.8) + // 能力がブレる
+    Math.random() * 40;                     // 展開・運
+  });
+
+  const resultHorses = [...horses].sort((a,b)=>b.score-a.score);
+
+  // 結果表示
+  let html = "<h3>🏁 レース結果</h3>";
+  resultHorses.forEach((h,i)=>{
+    html += `
+      <div>
+        ${i+1}位：${h.number}番 ${h.name}
+        （${h.odds}倍 / 人気${h.popularity}位）
+      </div>
+    `;
+  });
+  document.getElementById("result").innerHTML = html;
+
+  const messageArea = document.getElementById("hitMessage");
+
+  // 的中判定
+  if (resultHorses[0].number === pick) {
+    const payout = Math.floor(bet * resultHorses[0].odds);
+    money += payout;
+    totalPayout += payout;
+
+    messageArea.innerHTML = `
+      <div class="hit">🎯 的中！！</div>
+      <div>配当金：${payout} 円</div>
+    `;
+  } else {
+    messageArea.innerHTML = `<div class="miss">あぁ……😢</div>`;
+  }
+
+  document.getElementById("money").textContent = money;
+  document.getElementById("payout").textContent = totalPayout;
+
+  document.getElementById("startBtn").disabled = true;
+
+  if (money <= 0) {
+    messageArea.innerHTML += `<div class="miss">💀 ゲームオーバー</div>`;
+  }
+}
+
+</script>
+</div>
+
+</body>
+</html>

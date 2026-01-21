@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>井の頭線急行ゲーム</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+    input {
+      font-size: 18px;
+      width: 90px;
+      text-align: center;
+    }
+    button {
+      font-size: 18px;
+      padding: 8px 16px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🚃 井の頭線急行、乗車人数予想ゲーム<br>あなたの乗っている車両には何人乗ってくるか？</h2>
+
+  <div id="message"></div>
+  <div id="inputArea"></div>
+  <div id="buttonArea"></div>
+
+  <script>
+    const stations = [
+      { name: "久我山", min: 1, max: 5 },
+      { name: "永福町", min: 1, max: 10 },
+      { name: "明大前", min: 1, max: 20 },
+      { name: "下北沢", min: 1, max: 20 }
+    ];
+
+    let currentStep = 0;
+    let answers = [];
+    let userAnswers = [];
+
+    const message = document.getElementById("message");
+    const inputArea = document.getElementById("inputArea");
+    const buttonArea = document.getElementById("buttonArea");
+
+    function render() {
+      message.innerHTML = "";
+      inputArea.innerHTML = "";
+      buttonArea.innerHTML = "";
+
+      if (currentStep === 0) {
+        message.innerHTML = "<h3>準備はいいですか？</h3>";
+        createButton("🚃 吉祥寺発車！", startGame);
+
+      } else if (currentStep >= 1 && currentStep <= 4) {
+        const s = stations[currentStep - 1];
+        message.innerHTML = `
+          <h3>${s.name}で何人乗ってくる？</h3>
+          <p>（${s.min}〜${s.max}人）</p>
+        `;
+
+        const input = document.createElement("input");
+        input.type = "number";
+        input.min = s.min;
+        input.max = s.max;
+        input.id = "guess";
+        inputArea.appendChild(input);
+
+        createButton("次へ", nextStation);
+
+      } else if (currentStep === 5) {
+        message.innerHTML = "<h3>🏁 渋谷到着！</h3>";
+        createButton("結果発表", showResult);
+      }
+    }
+
+    function createButton(text, handler) {
+      const btn = document.createElement("button");
+      btn.textContent = text;
+      btn.onclick = handler;
+      buttonArea.appendChild(btn);
+    }
+
+    function startGame() {
+      answers = [];
+      userAnswers = [];
+      stations.forEach(s => {
+        answers.push(
+          Math.floor(Math.random() * (s.max - s.min + 1)) + s.min
+        );
+      });
+      currentStep = 1;
+      render();
+    }
+
+    function nextStation() {
+      const value = Number(document.getElementById("guess").value);
+      userAnswers.push(value);
+      currentStep++;
+      render();
+    }
+
+    function getComment(score) {
+      if (score === 4) return "神がかっています…！開眼案件！";
+      if (score === 3) return "かなり鋭い！3連単一点買いでもあたるかも？しれないですね";
+      if (score === 2) return "直感あたたまってまいりました！！";
+      if (score === 1) return "いい感じです！";
+      return "深呼吸をして、今の自分を俯瞰で見てみましょう";
+    }
+
+    function showResult() {
+      message.innerHTML = "<h3>🏁 渋谷到着！ 結果発表</h3>";
+      inputArea.innerHTML = "";
+      buttonArea.innerHTML = "";
+
+      let score = 0;
+      let resultHTML = "<ul style='list-style:none; padding:0;'>";
+
+      stations.forEach((s, i) => {
+        const ok = userAnswers[i] === answers[i];
+        if (ok) score++;
+        resultHTML += `
+          <li>
+            ${s.name}：
+            あなた ${userAnswers[i]}人 /
+            正解 ${answers[i]}人
+            → ${ok ? "⭕ 正解" : "❌ 不正解"}
+          </li>
+        `;
+      });
+
+      resultHTML += `
+        </ul>
+        <h3>🎯 スコア：${score} / 4</h3>
+        <p>${getComment(score)}</p>
+      `;
+
+      inputArea.innerHTML = resultHTML;
+    }
+
+    render();
+  </script>
+
+</body>
+</html>

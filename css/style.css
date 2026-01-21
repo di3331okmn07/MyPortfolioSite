@@ -1,0 +1,279 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* メインビジュアル */
+.slider {
+  width: 100%;
+  height: 400px;
+  position: relative;
+  overflow: hidden;
+}
+
+.slide {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  transition: opacity 1s ease;
+}
+
+.slide.active {
+  opacity: 1;
+}
+
+/* テキストエリア */
+.contents {
+  display: flex;
+  justify-content: space-between;
+  padding: 60px 10%;
+  background: #fff;
+}
+
+.column {
+  width: 30%;
+  text-align: center;
+  font-size: 16px;
+}
+
+
+.cards {
+  display: flex;
+  justify-content: space-between;
+  padding: 60px 10%;
+  background: #fff;
+}
+
+.card {
+  width: 30%;
+  text-align: center;
+}
+
+.card img {
+  width: 100%;
+  height: auto;
+  margin-bottom: 16px;
+}
+
+.card p {
+  font-size: 16px;
+}
+
+
+.thumb {
+  width: 100%;
+  transition: transform 0.3s ease;
+}
+
+.thumb:hover {
+  animation: float 0.6s ease-in-out;
+}
+
+@keyframes float {
+  0%   { transform: translateY(0) rotate(0); }
+  30%  { transform: translateY(-8px) rotate(2deg); }
+  60%  { transform: translateY(-4px) rotate(-2deg); }
+  100% { transform: translateY(0) rotate(0); }
+}
+
+.mv-message {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+.mv-message.is-show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.intro-overlay.is-hidden {
+  display: none;
+}
+
+/* ===== オーバーレイ全体 ===== */
+.intro-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(4px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.intro-overlay.hide {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.intro-box {
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+}
+
+
+
+
+/* メインビジュアルの白熊 */
+.slider {
+  width: 100%;
+  height: 400px; /* 調整可 */
+  position: relative; /* ←超重要 */
+  overflow: hidden;
+}
+
+/* スライド画像 */
+.slide {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 右下デコPNG */
+.mv-deco {
+  position: absolute;
+  right: 40px;
+  bottom: 20px;
+  width: 200px;     /* PNGの表示サイズ */
+  height: auto;
+  pointer-events: auto; /* ← ホバーを効かせるため重要 */
+  opacity: 0.9;     /* うっすら感 */
+}
+
+/* スマホでは非表示 */
+
+@media screen and (max-width: 768px) {
+  .mv-deco {
+    display: none;
+  }
+}
+
+/* メインビジュアル下のメッセージ */
+
+.mv-message {
+  text-align: center;
+  padding: 24px 16px;
+  background: #fff;
+}
+
+.mv-message p {
+  margin: 0;
+  font-size: 16px;
+  line-height: 1.8;
+  color: #333;
+}
+
+.mv-message strong {
+  font-weight: 600;
+}
+
+@media screen and (max-width: 768px) {
+  .mv-message p {
+    font-size: 14px;
+  }
+}
+
+/* 画像ビジュアル調整 */
+.thumb {
+  display: block;
+  border-radius: 12px;
+  box-shadow:
+    0 8px 20px rgba(0, 0, 0, 0.08),
+    0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.thumb:hover {
+  box-shadow:
+    0 14px 40px rgba(0, 0, 0, 0.18),
+    0 6px 14px rgba(0, 0, 0, 0.12);
+  transform: translateY(-4px);
+}
+
+/* deco専用の微調整 */
+.deco {
+  opacity: 0.9;
+}
+
+.deco:hover {
+  transform: translateY(-2px); /* 少し控えめに */
+}
+
+.mv-deco {
+  filter:
+    drop-shadow(0 0 6px rgba(255, 255, 255, 0.4))
+    drop-shadow(0 0 14px rgba(180, 220, 255, 0.35))
+    drop-shadow(0 0 28px rgba(120, 180, 255, 0.25));
+}
+
+
+.slide {
+  position: absolute;     /* ←追加 */
+  inset: 0;               /* ←追加（top:0;right:0;bottom:0;left:0;と同じ） */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;             /* ←追加 */
+  transition: opacity 1s ease; /* ←追加 */
+}
+
+.slide.active {
+  opacity: 1;
+}
+
+.mv-text {
+  position: absolute;
+  left: 8%;
+  bottom: 20%;
+  z-index: 10;
+  color: #fff;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+.mv-deco {
+  position: absolute;
+  right: 5%;
+  bottom: 0;
+  height: 90%;
+  z-index: 11;
+}
+
+.mv-text h1,
+.mv-text p {
+  text-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.45),
+    0 8px 20px rgba(0, 0, 0, 0.35);
+}
+
+
+img {
+      width: 300px;  /* 好きなサイズに調整してください */
+      border-radius: 15px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .start-button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 12px 36px;
+      font-size: 20px;
+      font-weight: bold;
+      color: white;
+      background-color: #e53935; /* 赤系 */
+      border: none;
+      border-radius: 24px;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background-color 0.3s ease;
+      user-select: none;
+    }
+    .start-button:hover {
+      background-color: #b71c1c; /* 濃い赤に変化 */
+    }

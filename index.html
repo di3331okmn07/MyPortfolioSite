@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>ポートフォリオサイト</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- オーバーレイ説明画面 -->
+<div id="introOverlay" class="intro-overlay">
+  <div class="intro-box">
+    <h2>このサイトについて</h2>
+    <p>
+      本サイトはポートフォリオとして制作したデモサイトです。<br>
+      UI / UX を意識し、<br>
+      ・メインビジュアルのスライダー<br>
+      ・ホバー時のアニメーション<br>
+      ・視認性と動線設計<br>
+      を重視して作成しています。<br>
+      【ご参考】：ChatGPTと一緒に0ベースから作成しました。
+    </p>
+    <button id="closeIntro">×</button>
+  </div>
+</div>
+
+  <!-- メインビジュアル -->
+  <div class="slider">
+    <img src="images/mv2.png" class="slide active" alt="">
+    <img src="images/mv3.png" class="slide" alt="">
+    <img src="images/mv4.png" class="slide" alt="">
+    <img src="images/mv5.png" class="slide" alt="">
+    <img src="images/deco.png" class="mv-deco" alt="">
+
+  	<div class="mv-text">
+    		<h1>eラーニング制作 × 生成AI</h1>
+    		<p>実務6年のポートフォリオ</p>
+  	</div>
+  </div>
+
+<!-- メッセージ -->
+<div class="mv-message">
+  <p>
+　　ご来訪どうもありがとうございます<br>
+　　こちら、経歴紹介のサイトになります<br><br>
+    大手SI系教育企業にて<br>
+    <strong>eラーニング制作業務を6年間担当しました。</strong>
+  </p>
+</div>
+
+  <!-- テキストエリア -->
+  <div class="cards">
+  	<div class="card">
+    		<img src="images/thumb1.png"  alt="" class="thumb deco">
+    		<p>■収録・撮影業務<br>
+		オーダー案件の収録・グループ従業員向けの講演イベントの収録
+		</p>
+  	</div>
+
+  	<div class="card">
+    		<img src="images/thumb2.png" class="thumb"  alt="">
+    		<p>■社内ツール手順書作成<br>
+		少人数向け業務マニュアル整備<br>
+		※OBSで操作動画を撮り編集
+		</p>
+  	</div>
+
+  	<div class="card">
+    		<img src="images/thumb3.png" class="thumb"  alt="">
+    		<p>■Premiere Proによる映像編集<br>
+		動画編集・字幕制作(srt→VTT)・書出<br>
+		After Effectも使用可。
+		</p>
+  	</div>
+  </div>
+
+  <div class="cards">
+  	<div class="card">
+    		<img src="images/thumb4.png" class="thumb"  alt="">
+    		<p>■社内サイトの定期更新<br>
+		半期ごとのイントラサイトの<br>更新作業をローテーションで担当
+		</p>
+  	</div>
+
+  	<div class="card">
+    		<img src="images/thumb5.png" class="thumb"  alt="">
+    		<p>■運用・メンテナンス<br>
+		SCORMデータ更新・改修対応
+		</p>
+  	</div>
+
+  	<div class="card">
+    		<img src="images/thumb6.png" class="thumb"  alt="">
+    		<p>■新施策・改善<br>
+		3D教材の施策（Blender）<br>
+		新表現（スマホ収録）の推進
+		</p>
+  	</div>
+  </div>
+
+  <div class="cards">
+  	<div class="card">
+    		<img src="images/thumb7.png" class="thumb"  alt="">
+    		<p>■社内資料用ピクトグラム集作成<br>
+		チャッピーで作成しPhotoShopで整形<br>
+		AFで動くピクトグラムも作成。
+		</p>
+  	</div>
+
+  	<div class="card">
+    		<img src="images/thumb8.png" class="thumb"  alt="">
+    		<p>■イラスト作成<br>
+		対話型アバターオリジナルイラスト作成<br>
+		※チャッピーで作成しPhotoShopで整形
+		</p>
+  	</div>
+
+  	<div class="card">
+    		<img src="images/thumb9.png" class="thumb"  alt="">
+    		<p>■アンケート調査<br>
+		陳腐化対策・潜在不良の確認等
+		</p>
+  	</div>
+  </div>
+
+  <div class="cards">
+
+  	<div class="card">
+    		<img src="images/game.png" class="thumb"  alt="">
+    		<p>■業務未経験分野・Python的思考を、JavaScriptでWebゲーム化<br>
+		直感力ゲーム<br>
+		※チャッピーとgeminiで作成<br>
+		<a href="game.html" class="start-button">ゲームスタート</a>
+		</p>
+  	</div>
+
+  	<div class="card">
+    		<img src="images/game2.png" class="thumb"  alt="">
+    		<p>■業務未経験分野・Python的思考を、JavaScriptでWebゲーム化<br>
+		競馬ゲーム<br>
+		※チャッピーとgeminiで作成<br>
+		<a href="uma.html" class="start-button">ゲームスタート</a>
+		</p>
+  	</div>
+
+
+  	<div class="card">
+    		<img src="images/video.png" class="thumb"  alt="">
+    		<p>■blenderとOBSを使った動画作成<br>
+		※普段の業務ではpremiere proとafter effectを使用<br>
+		<a href="images/video.mp4" class="start-button">再生</a>
+		</p>
+  	</div>
+
+  </div>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
