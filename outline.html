@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>アウトラインプロセッサー</title>
+
+<style>
+body{
+  margin:0;
+  display:flex;
+  height:100vh;
+  font-family:sans-serif;
+}
+
+#sidebar{
+  width:320px;
+  border-right:1px solid #ccc;
+  padding:10px;
+  overflow:auto;
+  background:#f9f9f9;
+}
+
+#editor{
+  flex:1;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+}
+
+textarea{
+  flex:1;
+  font-size:16px;
+  padding:10px;
+  resize:none;
+  color:#000;
+}
+
+.node{
+  margin:5px 0;
+}
+
+.node-title{
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+
+.node input[type="text"]{
+  border:none;
+  background:transparent;
+  font-size:14px;
+  flex:1;
+}
+
+.node input[type="text"]:focus{
+  outline:1px solid #aaa;
+  background:white;
+}
+
+.children{
+  margin-left:20px;
+}
+
+.toggle{
+  cursor:pointer;
+  width:16px;
+}
+
+button{
+  font-size:12px;
+  cursor:pointer;
+}
+
+#toolbar{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:10px;
+}
+
+#colorPreview{
+  width:24px;
+  height:24px;
+  border:1px solid #333;
+}
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <button onclick="addParentNode()">＋ 親ノード追加</button>
+  <button onclick="saveToFile()">💾 保存</button>
+  <button onclick="document.getElementById('fileInput').click()">📂 読み込み</button>
+  <input type="file" id="fileInput" style="display:none" accept=".json">
+  <div id="tree"></div>
+</div>
+
+<div id="editor">
+  <div id="toolbar">
+    <label>文字色:</label>
+    <input type="color" id="colorPicker">
+    <div id="colorPreview"></div>
+  </div>
+  <textarea id="content" placeholder="本文を入力..."></textarea>
+</div>
+
+<script>
+let selectedNode = null;
+let nodes = [];
+
+const tree = document.getElementById("tree");
+const content = document.getElementById("content");
+const colorPicker = document.getElementById("colorPicker");
+const colorPreview = document.getElementById("colorPreview");
+
+colorPicker.value="#000000";
+colorPreview.style.backgroundColor="#000000";
+
+colorPicker.addEventListener("input",()=>{
+  if(selectedNode){
+    selectedNode.color=colorPicker.value;
+    content.style.color=colorPicker.value;
+    colorPreview.style.backgroundColor=colorPicker.value;
+  }
+});
+
+content.addEventListener("input",()=>{
+  if(selectedNode){
+    selectedNode.text=content.value;
+  }
+});
+
+function createNode(title=""){
+  return {title:title,text:"",color:"#000000",children:[],open:true};
+}
+
+function render(){
+  tree.innerHTML="";
+  nodes.forEach(node=>{
+    tree.appendChild(renderNode(node));
+  });
+}
+
+function renderNode(node){
+  const div=document.createElement("div");
+  div.className="node";
+
+  const titleRow=document.createElement("div");
+  titleRow.className="node-title";
+
+  const toggle=document.createElement("span");
+  toggle.className="toggle";
+  toggle.textContent=node.open?"▼":"▶";
+  toggle.onclick=()=>{
+    node.open=!node.open;
+    render();
+  };
+
+  const input=document.createElement("input");
+  input.type="text";
+  input.value=node.title;
+  input.oninput=()=>{node.title=input.value;};
+  input.onclick=()=>{selectNode(node);};
+
+  const addChildBtn=document.createElement("button");
+  addChildBtn.textContent="＋子";
+  addChildBtn.onclick=()=>{
+    node.children.push(createNode(""));
+    node.open=true;
+    render();
+  };
+
+  const delBtn=document.createElement("button");
+  delBtn.textContent="削除";
+  delBtn.onclick=()=>{
+    deleteNode(node);
+    render();
+  };
+
+  titleRow.append(toggle,input,addChildBtn,delBtn);
+  div.appendChild(titleRow);
+
+  if(node.children.length>0){
+    const childDiv=document.createElement("div");
+    childDiv.className="children";
+    childDiv.style.display=node.open?"block":"none";
+    node.children.forEach(child=>{
+      childDiv.appendChild(renderNode(child));
+    });
+    div.appendChild(childDiv);
+  }
+
+  return div;
+}
+
+function selectNode(node){
+  selectedNode=node;
+  content.value=node.text;
+  content.style.color=node.color;
+  colorPicker.value=node.color;
+  colorPreview.style.backgroundColor=node.color;
+}
+
+function deleteNode(target){
+  function recursiveDelete(arr){
+    const index=arr.indexOf(target);
+    if(index!==-1){
+      arr.splice(index,1);
+      return true;
+    }
+    for(let node of arr){
+      if(recursiveDelete(node.children)) return true;
+    }
+    return false;
+  }
+  recursiveDelete(nodes);
+  if(selectedNode===target){
+    selectedNode=null;
+    content.value="";
+  }
+}
+
+function addParentNode(){
+  nodes.push(createNode(""));
+  render();
+}
+
+/* ===== ファイル保存 ===== */
+
+function saveToFile(){
+  const dataStr=JSON.stringify(nodes,null,2);
+  const blob=new Blob([dataStr],{type:"application/json"});
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(blob);
+  a.download="outline_data.json";
+  a.click();
+}
+
+/* ===== ファイル読み込み ===== */
+
+document.getElementById("fileInput").addEventListener("change",function(e){
+  const file=e.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(evt){
+    nodes=JSON.parse(evt.target.result);
+    render();
+  };
+  reader.readAsText(file);
+});
+
+render();
+</script>
+
+</body>
+</html>
